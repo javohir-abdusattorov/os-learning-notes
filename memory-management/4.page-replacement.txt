@@ -1,0 +1,59 @@
+Optimal - Not implementable, but useful as a benchmark:
+Each page should be labeled with the number of instructions that will be executed before that page is referenced. and page with the highest label should be removed. But this algorithm is unrealizable
+
+Not Recently Used - Very crude approximation of LRU:
+Page entries have 2 bits: R - read, W - write. R bit is cleared peridically by clock interrupt. The algorithm sortes pages by these bits, and removes entries with least usability. It is better to remove a modified page that has not been referenced in at least one clock tick
+
+FIFO (First-in first-out) - Might throw out important pages:
+OS maintains a list of all pages currently in memory, tail - most recent, head - least recent
+
+Second chance - Big improvement over FIFO:
+Modification to FIFO, that inspects the least recent page R bit:
+* 0 - the page is both old and unused, so it is replaced immediately
+* 1 - the bit is cleared, the page is put onto the end of the list of pages, and its load time is updated as new. Then search continues
+
+Clock - Realistic:
+Modifiation to Second chance, is to keep all the page frames on a circular list in the form of a clock. When page fault occurs, page being pointed by hand is checked R bit:
+* 0 - the page is replaced, the hand is moved 1 position
+* 1 - the page R bit is cleared, the is moved 1 position
+
+LRU (Least Recently Used) - Excellent, but difficult to implement exactly:
+When a page fault occurs, eliminate the page that has been unused for the longest time. To implement, we should maintain a linked list of all pages in memory, with the most recenlty used page at the front and least recently used at the end. In every memory reference, we need to find a page in the list, delete it, move it to the front. Another way of implementing it is using counter for every page entry.
+
+NFU (Not Frequently Used) - Fairly crude approximation to LRU:
+Requires a software counter for each page, intially 0. At each clock interrupt, OS scans all the pages, for each page, the R bit (may be 0 or 1) is added to page counter. Counters keep track of how often each page has been referenced. When a page fault occurs, the page with the lowest counter is replaced
+
+Aging - Efficient algorithm that approximates LRU well:
+Each page has 8 bit counter, in each clock interrupt page counter will be shifted to the right, and in left will be added its R bit (0/1). For example, in the 1st clock interrupt page had counter "010000000", then while next clock interrupt page have been referenced, counter should be "10100000", adding 1 in the front and shifting whole number to the left
+
+Working set - Expensive to implement:
+Each page has 2 key items: approximate time the page was last used, and R bit. At each page, R bit is examined:
+* 1 - referenced, meaning it in working set
+* 0 - has not been referenced, to check for removal, its age (current virtual time minus page's time of last use) is computed and compared to constant T:
+    * greater - if age is greater than T, page is no longer in the working set
+    * less than - page is still in the working set, page is temporarly spared. But page with greatest age (oldest time of last use) is noted. If in the entire table we cannot find candidate to eliminate, we find pages with R=0 and eliminate the one with greatest age
+
+WSClock (Working Set Clock) - Good efficient algorithm:
+It is the combination of working set and clock algorithms. At page fault, page pointed by hand is examined first for R bit:
+* 1 - referenced, R bit is set to 0, the hand advanced to next page
+* 0 - not referenced, if age is greater than T and page is clean - page is claimed and new page will be put there. On the other hand if page is dirty, it cannot be claimed immediately since no valid copy is present on disk. To avoid process switch, the write to disk scheduled, but hand is moved.
+When hand comes all the way around and back to its starting point:
+* at least one write has been scheduled - the hand just keeps moving, looking for clean page
+* no writes have been scheduled - all pages are in working set, we will claim any clean page and use it. And if no clean pages exist, current page is choosen as victim and written back to disk
+
+
+
+
+Demanded paging - when processes are started up, none of their pages will be in memory. As soon as the CPU tries to fetch the first instruction, page fault occurs, and OS bring in the page
+
+Locality of reference - during any phase of executon, process references only a relatively small fraction of its pages
+
+Working set - set of pages that a process is currently using
+
+Thrashing - a program causing page faults every few instructions. If available memory is too small, page faults occur too many times. And that depends us on the reading from disk often
+
+Working set model - trying to keep track of each process' working set and make sure that it is in memory before letting the process run when it was hibernated
+
+Prepaging - loading the pages before letting processes run
+
+Current virtual time - amount of CPU time a process has actually used since it started

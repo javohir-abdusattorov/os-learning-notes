@@ -1,0 +1,36 @@
+One of the solutions to the problem of programs larger than memory is to split programs into little pieces, called overlays
+
+Virtual memory - each program has its own address space, which is broken up into chunks called pages. Each page is a contigous range of addresses. Pages are mapped onto physical memory, but not all pages have to be at the same time to run the program.
+
+When program references a part of its address space:
+* that is in physical memory, the hardware performs mapping on the fly.
+* not in physical memory, the OS is alerted to go get the missing piece and re-execute the instruction
+
+Memory Management Unit - maps virtual addresses onto the physical memory addresses
+
+Page table - relation between virtual addresses and physical memory addresses, in mathematical sense, page table is a function, receiving virtual page number as  argument and physical frame number as a result
+
+To keep track of which pages are physically present in memory, we use PRESENT/ABSENT bit
+
+When program references an unmapped address - MMU notices that page is unmapped and causes the CPU to trap to the OS, which is called page fault. The OS picks a least usued page frame and swaps it to the disk, and fetches page that was just referenced into the page frame, changes the map, and restarts the trapped instruction
+
+Page frame structure:
+* page frame number: index
+* present/absent bit: 1=valid and can be used, 0=virtual page is not currently in memory
+* protection: access bits, simple example is 1 bit - 0 for read/write, 1 for read only
+* modified: when page is written to, if page is modified (dirty), it must be written back to disk; if it has not been modified (clean), it can be abondened
+* referenced: used to select pages to eliminate when page fault occurs, least used pages are eliminated
+* caching disabled: ---
+
+One solution for speeding up paging is using device TLB (Translation Lookaside Buffer). It is essentially the most used pages of page table
+
+Different kids of misses:
+* soft miss - page referenced is not in the TLB, but is in memory
+* hard miss - page itself is not in memory
+* minor page fault - page references is not in the TLB, but may have been brought in from disk by another process
+* segmentation fault - program accessed an invalid address
+
+Multilevel paging:
+* geeksforgeeks.org - https://www.geeksforgeeks.org/multilevel-paging-in-operating-system/
+* baeldung.com - https://www.baeldung.com/cs/multi-level-page-tables/
+

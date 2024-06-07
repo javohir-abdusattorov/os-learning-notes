@@ -1,0 +1,5 @@
+
+The simplest memory abstarction is to have no abstraction at all. In this model every program simply saw the physical memory.
+When a program executed an instruction like: "MOV MY_REGISTER1, 1000" - computer just moved the contents of physical memory location 1000 to "MY_REGISTER1".
+
+To run miltiple programs without a memory abstraction, what the OS has to do is save the entire contents of memory to a disk file, then bring in and run the the next program. As long as there is only one program at a time in memory, there are no conflicts.

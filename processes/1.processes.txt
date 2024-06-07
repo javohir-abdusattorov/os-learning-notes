@@ -1,0 +1,131 @@
+
+--- About process ---
+
+Process is the abstraction of running program. Abstraction is needed to:
+    * run multiple processes in 1 CPU at a time 
+    * provide programmers to work with OS in a better communicative way.
+ 
+In a 1 CPU system CPU is only working on 1 processes at a time, and contiunally switching between processes to give illusion of parallelism. And dealing with and keeping track of multiple activities running at the same time is hard. Therefore, OS designers over the years have evolved a consceptual model that makes parallelism easier to deal with.
+
+All runnable sowtfare on the computer, including operating system, is organized into a number of processes. A process is just an instance of an executing program, including:
+    * currenct values of the program counter
+    * registers
+    * varaibles
+
+Conceptually each process has its own CPU, because it is easier to thing about a collection of processes running in parallel, than to try to keep track of how the CPU switches from program to program. When switching between processes, CPU saves each programs counters, variables in memory to start them when CPU is aviable.
+
+Process is an activity of some kind. It has a program, input, output and a state. A single processor may be shared among several proceses, with scheduling. In contrast, a program is something that may be stored on disk, not doing anything.
+
+
+
+
+
+
+
+
+
+
+--- Process creation ---
+
+Events couse processes to be created:
+    * system initialization
+    * execution of a process-creation system call by running process
+    * user request
+    * initiation of a batch job
+
+Processes that stay in the background to handle some activity such as email, Web pages, news, printing, and so on are called daemons. Creating new proceses is particularly useful when the work to be done can easily be formulated in terms of several related, but otherwise independent interacting proceses. For example, if a large amount of data is being fetched over a network for subsequent processing,it may be convenient to create one process to fetch the data and put them in a shared buffer while a second process removes the data items and processes them.
+
+
+
+
+
+
+
+
+
+
+--- Process termination ---
+
+Processes will terminate, due to one of the following conditions:
+    * Normal exit (voluntary)
+    * Error exit (voluntary)
+    * Fatal error (involuntary)
+    * Killed by another process (involuntary)
+
+
+
+
+
+
+
+
+
+
+
+--- Process hierarchies ---
+
+If one process creates another new process, they continue to be assosiated in certain ways. The child process can itself create one or more than two processes - forming proces hierarchy. If user sends signal, main process and its child processes can handle the signal or ignore the signal, or killed by signal.
+
+
+
+
+
+
+
+
+
+
+
+
+--- Process states ---
+
+    * Running - actually using the CPU at that instant
+    * Ready - runnable but temporarily stopped to let another process run
+    * Blocked - unable to run until some external event happens
+
+When a process blocks, it does so becuase logically it cannot continue, typically because it is waiting for input that is not yet aviable. It is also possible for processs that is conceuptually ready and able to run to be stopped because operating system has decided to allocate the CPU to anoher process for a while.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Implementation of processes ---
+
+To implement the process model, operating system maintains a table (an array of structures) called process table. This entry contains important information about:
+    * process state
+    * program counter
+    * stack pointer
+    * memory allocation
+    * status of processes open files
+    * accounting
+    * scheduling
+    * and everything else about the process
+    
+This information is needed to start process when it is in ready state, as if it had been never stopped.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

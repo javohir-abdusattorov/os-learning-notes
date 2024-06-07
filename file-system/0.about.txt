@@ -1,0 +1,10 @@
+Requirements for long-term information storage:
+* It must be possible to store a very large amount of information
+* Information must survive the termination of the process using it
+* Multiple processes must be able to access the information at once
+
+Disk - linear sequence of fixed-size blcocks, supporting 2 operations: read block K, write block K
+
+Files - logical units of information created by processes. We can think of file as a kind of address space. Information stored in files must be persistent - not be affected by process creation and termination.
+
+File system - part of the OS dealing with files. Determines how files are structured, named, accessed, used, protected, implmeented, and managed

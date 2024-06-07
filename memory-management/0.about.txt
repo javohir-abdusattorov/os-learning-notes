@@ -1,0 +1,14 @@
+
+Main memory (RAM) is an important resource that must be very carefully managed.
+"Memory hiererchy" is concept that computers have:
+    * a few megabytes of very fast, expensive, volatile cache memory
+    * a few gigabytes of of medium-speed, medium-priced, volatilve main memory
+    * a few terabytes of slow, cheap, nonvolatile magnetic or solid-state disk storage
+    * removable storage, such as DVDs, and USB sticks
+
+It is the job of the operating system to abstract this hierarchy into a useful model and then manage the abstraction. And this part is called the "memory manager".
+Its jobs are:
+    * keep track of which parts of memory are in use
+    * allocate memory to processes when they need it
+    * deallocate it when they are done
+

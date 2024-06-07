@@ -1,0 +1,33 @@
+Events in page fault:
+1. the hardware traps to the kernel, saving the program counter on the stack
+2. Assembly-code routine is started to save the general registers and other volatile information
+3. OS discoversa that a page fault has occured, and tries to discover which virtual page is needed. If hardware registers does not contain this information, OS must retreive the program counter, fetch the instruction, and parse it in software to figure out what it was doing when the fault hit
+4. When virtual address is known, the system checks to if this address is valid and the protection is consistent with access. If not process is killed. If everything is valid, the system checks to see if a page frame is free. If no frames are free, page replacement algorithm is run to eliminate pages
+5. If page selected is dirty, page is scheduled for write to disk, and a context switch occurs - suspending current process and letting another run until the disk transfer has completed. Page frame is marked as busy
+6. When page frame is cleaned, OS looks up the disk address where the needed page is, and schedules disk to bring it in. While waiting for disk, context switch might occur
+7. When disk interrupt indicates that the page has arrived, the page tables are updated and the page frame is marked as being in normal state
+8. The faulting instruction is backed up to the state it had when it began and the program counter is reset to point that instruction
+9. The faulting process is scheduled, and the OS returns to the routine that called it
+10. This routine reloads registers and other state info and returns to user space to continue execution.
+
+If process issues a system call to read from some file, the process is suspended and another process is allowed to run. Other page may get page fault. If paging algorithm is global, there is chance that the page containing IO buffer will be chosen to be eliminated. Solutions to this problem:
+* pinning - lock pages engaged in IO in memory so that they will not be removed
+* to do all IO to kernel buffers and then copy the data to user pages later
+
+Simple way to backup memory pages in disk is - have a spacial swap partition on the disk or, even better, on a seperate disk from the file system. Before process can start, the swap area must be intialized. One way is to copy the entire process image to swap area, so that it can be brought in as needed. Second way is to load the entire process in memory and let it paged out as needed.
+
+Non fixed addressed process - when a page is swapped out, an empty disk page is chosen on the fly and disk map (has room for one disk address per virtual page) is updated accordingly. A page in memory has no copy on disk. The pages' entries in the disk map contain an invalid disk address or a bit marking them as not in use.
+
+Since program text is generally read only, when memory is tight and program pages have to be evicted from memory, they are just discarded and read in again from the executable file when needed. Shared libraries can also work this way.
+
+MMU is divided into three parts:
+* low-level MMU handler - kernel
+* page fault handler - kernel
+* external pager - user space
+
+On page fault:
+1. fault handler figures out which virtual page is needed and sends a  message to external pager, telling it problem
+2. external pager then reads the needed page in from the disk and copies it to a portion of its own address space
+3. then it tells the fault handler where the page is
+4. fault handler then unmaps the page from the external pager's address space and asks the MMU handler to put it into the user's address space at the right place
+5. then user process can be restarted

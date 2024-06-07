@@ -1,0 +1,31 @@
+
+Address space - is the set of addresses that a process can use to address memory. Each process has its own address space, independent of those belonging to other processes.
+
+Dynamic relocation - is using base and limit registers. When a process starts, the base register is loaded with the physical address where its program begins in memory and the limit register is loadded with the length of the program.
+
+Approaches to dealing with memory overload:
+* swapping - bringing in each process in its entirety, running it for a while, then putting it back on the disk. Idle processes are mostly stored on disk, they do not take up any memory when they are not running
+* virtual memory - programms will run even when they are only partially in main memory
+
+Memory compaction - when swapping creates multiple holes in memory, combining them all into one big one by moving all processes downward, but it requires a lot of CPU time
+
+If procesess data segments tries to grow:
+* if a hole is adjacent to the processs, it can be allocated
+* process have to be moved to a hole in memory large enough for it
+* 1 or more processes will have to be swapped out to create a large enough hole
+* process have to be suspended until space is freed up
+* process can be killed
+
+It is good practise to allocate a little extra memory whenever a process is swapped in from disk, to reduce the overhead
+
+Bitmap - memory is divided into allocation units, 0 - free, 1 - occupied
+When it has been decided to bring a k-unit process into memory, the memory manager must search the bitmap to find a run of k consecutive 0 bits in the map - and it is slow operation
+
+To allocate memory for a created process:
+* first fit - memory manager scans along the list of segments until it finds a hole that is big enough, the hole is then broken up unto 2 pieces, one for process and one for unused memory
+* next fit - works same way as first fit, except it keeps track of where it is whenever it finds a suitable hole, so that next time starts from hole, not from start of list
+* best fit - searches entire list, takes the smallest hole that is adequate
+* worst fit - searches entire list, takes the largest available hole, so that the new hole will be big enough to be useful
+* quick fit - maintains seperate lists for some of more commons sizes requested (4KB holes, 8KB holes)
+
+To optimize searching, can be created 2 distinct lists for process and holes

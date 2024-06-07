@@ -1,0 +1,223 @@
+There are issues about internprocess communication:
+    * How one process can pass information to another
+    * Two or more processes does not have to get in each other's way
+    * Proper sequiencing when dependencies are present
+    
+
+
+
+
+--- Race conditions ---
+
+Race condition is situation, where two or more processes are reading or writing some shared data and the final result depends on who runs precisely when
+
+
+
+
+
+
+
+
+
+--- Critical regions ---
+
+Mutual exclusion is way of making sure that if one process is using a shared variable or file, other processes will be excluded from doing the same thing.
+Critical region is part of code that lead to race conditions, meaning process has to acess shared memory or files.
+If we coud arrange matters such that no two processes were ever in their critical regions at the same time, we could avoid races
+
+
+
+
+
+
+
+
+
+
+
+--- Mutual exclusion with Busy waiting ---
+
+There various proposals for achiening mutual exclusion:
+
+    Disabling interrupts. It is the simplest solution, to disable and enable all interrupts when entering and leaving the critical region. This approach is generally unattractive, because it is unwise to give user process the power to turn off interrupts. Furthermore, if the system is a multiprocessor disabling interrupts affects only the CPU that eecuted the disable instruction
+    
+    Lock variables. In this solution, the should be a single, shared variable, initially 0. When a process wants to enter its critical ergion, it first tests the lock, if the lock is 0, process sets it to 1 and enters the critical region. If the lock is already 1, process just waits until it becomes 0. Unfortunately, this idea contains some flaws, say, first process reads the lock and before it can enter its critical region, CPU switchess, and second process reads and enters its critical region before first.
+    
+    Strict alternation. In this solution, basic idea is taking turns to entering each processes critical regions. In program should be single, shared variable turn. While each process is leaving its critical region, process should mark turn as reversed, so that another process can enter its critical region. When process is waiting for another proceses, it sits in a tight loop continually testing turn. Continoulsy testing a variable until some value appears is called busy waiting. But, taking turns is not a good idea when one of the processes is much slower than the other.
+    
+    Peterson's Solution. In this solution, there are 2 main methods to work with critical regions of each process: enter_region(process: number), leavel_region(process: number). Initially neither process is in its critical region. Now process 0 calls enter_region. It indicates its interest by setting its array element and sets turn to 0. Since process 1 is not interested, enter_region returns immediately. If process 1 now makes a call to enter_region, it will hang there until intereset[0] goes to false, an event that happens only when process 0 calls leave_region to exit critical region.
+    
+    The TSL instruction. Some multiprocessor computers have instrcutions like: TSL RX, LOCK. It works just like Lock variables but in hardware level. To prevent race conditions, TSL instruction locks memory bus to prevent other CPUs from accessing memory until it is done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Sleep and Wakeup ---
+
+Sitting in tight loop for another process to leave its critical region is not very efficent for CPU, and it can have unexpected effects. Consider two processes, A - with high priority, B with lower priority. At certain moment B is in its cirtical region, it locked shared lock variable. But when B is finished with critical region, and tries to exit, it cannot because CPU is given to A all the time, to do busy waiting. And A will be there forewer to wait for B, but B cannot give turn to A, because it does not have CPU time. This situation is sometimes referred to as the priority inversion problem.
+
+There are other interprocess comminication primitives that block instead of wasting CPU time when they are not allowed to enter their critical regions. They are system methods called sleep() and wakeup(pid)
+
+
+The Producer-Consumer problem. Two processes share a common, fixed-size buffer. One of them, the producer, puts information into the buffer, and the other one, the consumer, takes it out. A problem occurs because access to count is unconstrained. A buffer is empty and the consumer has just read count to if it is 0. At that instant, CPU switches to producer. The producer inserts an item in the buffer, increments count, and notices that it is now 1. Reasoning that count was just 0, and this the consumer must be sleeping, producer calls wakeup to wake the consumer up. But consumer is not sleeping, and signal is lost. And when CPU switches to consumer, it just sleepes according to old data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Semaphores ---
+
+Sempahore is variable type for counting number of wapups saved for future use. There are 2 operations on semaphore: down and up. The "down" operation on a semaphore checks to see if the value is greator than 0. If so, it decrements the value and just continues. If value is 0, the process is put to sleep without completing the "down" for the moment. And these operations all done in indivisible "atomic action".
+
+Binary semaphore is semaphores that are initialzed to 1 and used by two or more processes to ensure that only one of them can enter its critical region at the same time
+
+Main uses of sempahores is mutal exlusion and synchronization
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Mutexes ---
+
+Mutex is a shared variable that can be in one of two states: unlocked or locked. The memory sits in user space but the toggling happens through system call inside the kernel. The kernel has to schedule the next thread in the wait queue.
+
+MUTEX_WAKE - the kernel has to schedule the next thread in the wait queue
+MUTEX_WAIT - all accesses to lock are guareded and queued through a single point of sychronization - the kernel
+
+Because of slow performance of mutexes, the new solution needed. Futex (fast user space mutex) is used as mutexes, but much faster. It achieves performace by implementing wait queue in user-space. 
+
+FUTEX_WAKE - wake anyone waiting on this address
+FUTEX_WAIT - when I read address, it contained "value": if it still contains that value when you look at it, sleep until someone calls FUTEX_WAKE on this address
+
+Condition variables is sychronization mechanism. Condition variables allow threads to block due to some condition not being met
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Monitors ---
+
+Deadlock is a situation when 2 or more processes need some resource to complete their execution that is held by another process. Example, the A process has resource 1 and needs to acquire resource 2. Similarly process B has resource 2 and needs to acquire resourse 1. Each of processes are in deadlock as each of them needs the other's resource to complete their execution but neither of them is willing to give away their resourses
+
+Monitor is a collection of procesdures, variables, and data structures that are all grouped together in a special kind of module or package
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Message passing ---
+
+Message passing uses 2 primitives "send" and "receive". "send" call sends a message to a given destination and the "receive" receives a message from a given source (or from any). If no message is aviable, the receiver can block until one arrives.
+
+Message passing systems have many problems and design issues:
+    1. Messages can be lost by network. Solution for this, the sender and receiver can agree that as soon as a message has been received, the receiver will send back a special "acknowledgement" message. But what happens if the message is received correctly, but the acknowledgement back to sender is lost. This problem is solved by putting consecutive sequence numbers in each original message.
+
+    2. Authentication. How can the client tell that it is communicating with the real file server, and not with an imposter?
+
+    3. Performance. Copying messages from one process to another is always slower than doing a semaphore operation or entering a monitor.
+
+
+Mailbox is a place to buffer a certain number of messages, typically specified when the mailbox is created
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- Barriers ---
+
+Some applications are divided into phases and have the rule that no process may proceed into next phace until all processes are ready to proceed to next phase. This behavior may be achieved by placing a barrier at the end of each phase.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

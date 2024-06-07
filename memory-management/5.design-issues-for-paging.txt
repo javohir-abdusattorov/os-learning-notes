@@ -1,0 +1,40 @@
+Local page replacement - eliminating page from local page table, without looking through all pages in memory
+
+Global page replacement - eliminating page from memory among runnable processes
+
+PFF (Page fault frequency) - algorithm tells when to increase/decrease a proces' page allocation but says nothing about which page to replace on a fault, just controls the size of allocation set
+
+Even with the best page replacement algorithm and optimal global allocation of page frames to processes, it can happen that the system thrases. Solution to this is to temporarily get rid of some processes. Good way to do it is, swap some of them to the disk and free up all the pages they were holding, and page frames will be divided up among other processes that are thrashing. We will remove processes until thrashing stops. To swap process, consider not only process size and paging rate, but also its characteristics, such as whether it is CPU bound or IO bound.
+
+Internal fragmentation - wasting the page memory
+
+Pros of small page size:
+* internal fragmentation is low, meaning less wastage of memory
+* program needs many pages, and thus a large page table. 34KB program needs only 4 8KB pages, but 64 512B pages. This increases transfers to and from disk, increasing IO load
+* use up much valuable space in the TLB. If program uses 1MB of memory with a working set of 64KB - 4KB pages occupy 16 entries in TLB; 2MB pages, 1 entry in TLB
+
+To balance these trade-offs, OS somestimes use different page size for different parts:
+* large pages for kernel
+* small pages for user processes
+
+I-space - address space for program instructions/text
+D-space - address space for program data
+Each have its own page tables
+
+When processes share code, problem occurs - if scheduler decides to remove A process from memory, eliminating all its pages and filling the empty page frames with some other program, will couse B to thrashing. When A terminates, OS needs to discover that the pages are still in use so that their disk space will not be cleared. Searching all page tables is too expensive.
+
+Copy on write - solution to shared memory. Give each of shared processes its own page table and have both of them point to the same set of pages. However, all the data pages are READ ONLY. When process updates a memory word, violation of the read-only protection couses trap to OS. Then OS copies target page, so that each process now has its own private copy. Both copies are now set to READ/WRITE
+
+Shared library (DLLs) - when a program is linked with  shareed libraries, insdead of including the actual function called, the linker includes a small stub routine that binds to the called function at run time. Depending on the system/configuration shared libraries are loaded: 1: when program is loaded; 2 - when functions in them are called for the first time. 
+
+Shared libraries have another important advantage - if a function in a shared library is updated to remove a bug, it is not neccessary to recompile programs that call it, old binaries continue to work.
+
+Position independent code - code that uses only relative offsets
+
+Memory mapped files - idea that a process can issue a system call to map a file into a portion of its virtual address space. No pages brought in at the time of mapping, but as pages are touched, they are paged in one page at a time, using the disk file as the backing store. This can provide an alternative model for I/O - instead of doing reads and writes, file can be accesses as a big character array in memory.
+
+Paging daemon - backgrounds process that inspect the state of memory in intervals. If free pages are few, it begins to eliminate pages with some page replacement algorithm. Implementation - 2 handed clock algorithm. Front hand is controlled by paging daemon, back hand used by paging replacement algorithm. Front hand is advanced if page is clean, if dirty it is written back to disk. By this probability of the back hand hitting a clean page is increased
+
+When 2 or more processes share the same physical address, high bandwidth sharing becomes possible - one writes to memory, one reads from it. Sharing of pages can also be used for high-performance message-passing system.
+
+And another technique is distributed shared memory. Idea here is to allow multiple processes over a network to share a set of pages, possibly as a single shared linear address space

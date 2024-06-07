@@ -1,0 +1,14 @@
+Segmentation - memory managemnt technique of dividing primary memory int o segments/sections. In segmentation, reference to a memory includes a value that identifies a segment and offset within that segment (A segment, 5 offset = A5). 
+
+Segments - independent address spaces. Consists of a linear sequence of addresses, starting at 0 and going up to soma maximum value. Their lengths may change during execution. Segment might contain a procedure, or an array, or a stack, or a collection of scalar variables, but usually it does not contain a mixture of different types.
+
+Segmentation also facilitates sharing procesdures or data between several processes. In segmented system, graphical library can be put in a segment and shared by multiple processes, eliminating the need for having it in every processs' address space. Since each segment forms a logical entity that programmers know about, such as a procedure, or an array, different segments can have different kinds of protection
+
+Segment without paging - each segment has information that indicates where segment is primary memory. This requires that entire segments be swapped back and forth between main memory and secondary storage. When segment is swapped in, OS has to allocate enough contigious free memory to hold entire segment. Checkerboarding / memory fragmentation results if there is not enough contigous free memory, even though there may be enough in total
+
+Segment with paging - each segment has the address of a page table for the segment. This implementation only moves individual pages back and forth between main memory and secondary storage.
+
+Checkerboarding / External fragmentation - memory that is diveded into a number of chunks, some containing segments and some containing holes
+
+Advantages of paging - uniform page size and not having to keep the whole segment in memory if only part of it was being used
+Advantages of segmentation - ease of programming, modularity, protection, sharing
